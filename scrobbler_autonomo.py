@@ -95,20 +95,37 @@ for song in ytm_history:
 
 new_songs_to_scrobble.reverse()
 
-# Bloco 6: Simulação e Confirmação
+# Bloco 6: Lógica de Envio Híbrida (Automática vs. Manual)
 if not new_songs_to_scrobble:
     print("\n-> Nenhuma música nova para enviar. Seu Last.fm está atualizado!")
+
+# Se estiver rodando no GitHub Actions, envia direto
+elif os.environ.get("CI") == "true":
+    print(f"\n--- ENCONTRADAS {len(new_songs_to_scrobble)} MÚSICA(S) NOVA(S) ---")
+    for song_data in new_songs_to_scrobble:
+        print(f"  - {song_data['artist']} - {song_data['title']}")
+    
+    print("\n-> Rodando em modo automático. Iniciando o envio...")
+    scrobbled_count = 0
+    now_timestamp = int(datetime.now(timezone.utc).timestamp())
+    for i, song_data in enumerate(new_songs_to_scrobble):
+        try:
+            network.scrobble(artist=song_data['artist'], title=song_data['title'], timestamp=now_timestamp - ((len(new_songs_to_scrobble) - 1 - i) * 240))
+            print(f"   ✔ Scrobble enviado: {song_data['artist']} - {song_data['title']}")
+            scrobbled_count += 1
+        except pylast.PyLastError as e:
+            print(f"   ✖ AVISO: Falha no scrobble para '{song_data['title']}': {e}")
+    print(f"\n--- Processo concluído! {scrobbled_count} scrobbles novos foram enviados. ---")
+
+# Se estiver rodando localmente, pergunta ao usuário
 else:
     print(f"\n--- ENCONTRADAS {len(new_songs_to_scrobble)} MÚSICA(S) NOVA(S) ---")
     for song_data in new_songs_to_scrobble:
         print(f"  - {song_data['artist']} - {song_data['title']}")
     
     print("-" * 30)
-if os.environ.get("CI") == "true":
-    print("-> Rodando em modo automático. Aprovando o envio...")
-    confirm = 's'
-else:
-    confirm = input("Você quer enviar esses scrobbles? (s/n): ").lower()    
+    confirm = input("Você quer enviar esses scrobbles? (s/n): ").lower()
+    
     if confirm == 's':
         print("\n--- Iniciando o envio de scrobbles ---")
         scrobbled_count = 0
