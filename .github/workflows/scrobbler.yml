@@ -1,11 +1,8 @@
 name: YTM Scrobbler Autônomo
 
 on:
-  # Gatilho 1: Roda de hora em hora, todo dia.
   schedule:
     - cron: '0 * * * *'
-
-  # Gatilho 2: Permite que você rode manualmente quando quiser.
   workflow_dispatch:
 
 jobs:
@@ -28,21 +25,19 @@ jobs:
 
       - name: 4. Entregando os ingressos VIP (Criando os arquivos a partir dos Secrets)
         run: |
-          # Cria o config.ini
           echo "[lastfm]" > config.ini
           echo "api_key = ${{ secrets.LASTFM_API_KEY }}" >> config.ini
           echo "api_secret = ${{ secrets.LASTFM_API_SECRET }}" >> config.ini
           echo "username = ${{ secrets.LASTFM_USERNAME }}" >> config.ini
           echo "password = ${{ secrets.LASTFM_PASSWORD }}" >> config.ini
           
-          # Cria o client_secret.json
           echo '${{ secrets.CLIENT_SECRET_JSON }}' > client_secret.json
 
-          # Cria o oauth.json inicial
           echo '${{ secrets.OAUTH_JSON }}' > oauth.json
 
       - name: 5. É HORA DO SHOW! (Rodando o script)
+        # Preste atenção na indentação aqui: 'env' e 'run'
+        # estão no mesmo nível, ambos filhos de 'name'.
+        env:
+          CI: true # Aqui está o "sinal secreto" para o nosso script
         run: python scrobbler_autonomo.py
-  env:
-    CI: true # Aqui está o sinal
-  run: python scrobbler_autonomo.py
