@@ -1,8 +1,13 @@
 name: YTM Scrobbler Autônomo
 
 on:
+  # --- ADIÇÃO IMPORTANTE AQUI ---
+  push:
+    branches: [ "main" ] # Roda toda vez que houver um push na branch 'main'
+
   schedule:
     - cron: '0 * * * *'
+    
   workflow_dispatch:
 
 jobs:
@@ -36,8 +41,6 @@ jobs:
           echo '${{ secrets.OAUTH_JSON }}' > oauth.json
 
       - name: 5. É HORA DO SHOW! (Rodando o script)
-        # Preste atenção na indentação aqui: 'env' e 'run'
-        # estão no mesmo nível, ambos filhos de 'name'.
         env:
-          CI: true # Aqui está o "sinal secreto" para o nosso script
+          CI: true
         run: python scrobbler_autonomo.py
