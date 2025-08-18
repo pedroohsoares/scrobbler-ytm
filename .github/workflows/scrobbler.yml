@@ -43,3 +43,6 @@ jobs:
 
       - name: 5. É HORA DO SHOW! (Rodando o script)
         run: python scrobbler_autonomo.py
+  env:
+    CI: true # Aqui está o sinal
+  run: python scrobbler_autonomo.py
