@@ -104,8 +104,11 @@ else:
         print(f"  - {song_data['artist']} - {song_data['title']}")
     
     print("-" * 30)
-    confirm = input("Você quer enviar esses scrobbles? (s/n): ").lower()
-    
+if os.environ.get("CI") == "true":
+    print("-> Rodando em modo automático. Aprovando o envio...")
+    confirm = 's'
+else:
+    confirm = input("Você quer enviar esses scrobbles? (s/n): ").lower()    
     if confirm == 's':
         print("\n--- Iniciando o envio de scrobbles ---")
         scrobbled_count = 0
